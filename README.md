@@ -16,50 +16,123 @@ Retos de código cada semana y un ranking para ver quién va primero. Lo mismo q
 - Login
 - App móvil con la misma interfaz que la web (Android y Windows)
 
-## Con qué
+## Arquitectura
 
-| Proyecto | Tecnología |
+La idea es la de [eShop](https://github.com/dotnet/eShop), la app de referencia de Microsoft: un dominio sin dependencias, la infraestructura aparte, una API con Minimal APIs, una librería de componentes que comparten la web y la app, y Aspire para arrancarlo todo junto.
+
+```mermaid
+flowchart LR
+    subgraph Clientes
+        Web["Web<br/>Blazor Web App (Auto)"]
+        App["HybridApp<br/>.NET MAUI Blazor Hybrid"]
+    end
+    UI["UI<br/>páginas y componentes compartidos"]
+    Api["Api<br/>Minimal APIs"]
+    Infra["Infrastructure<br/>EF Core + SQLite"]
+    Dominio["Domain<br/>entidades y reglas"]
+    Contracts["Contracts<br/>DTOs"]
+
+    Web --> UI
+    App --> UI
+    UI --> Contracts
+    Web -- "HTTP (/api/ → API)" --> Api
+    App -- HTTP --> Api
+    Api --> Contracts
+    Api --> Infra
+    Infra --> Dominio
+```
+
+| Proyecto | Qué hace |
 |---|---|
-| `CommunityHub.Web` | Blazor Web App |
-| `CommunityHub.Shared.UI` | Razor Class Library, compartida entre la web y el móvil |
-| `CommunityHub.Api` | ASP.NET Core con Minimal APIs, Identity y SignalR |
-| `CommunityHub.Maui` | .NET MAUI Blazor Hybrid |
-| Datos | EF Core + SQLite |
-| `CommunityHub.AppHost` | Aspire (opcional, llega al final) |
+| `CommunityHub.Domain` | Entidades y reglas del negocio (`Reto`). No depende de nada: ni de EF ni de ASP.NET |
+| `CommunityHub.Infrastructure` | EF Core + SQLite: `DbContext`, configuraciones, migraciones y datos de ejemplo |
+| `CommunityHub.Contracts` | Los DTOs que comparten la API, la web y la app |
+| `CommunityHub.Api` | Minimal APIs agrupadas por funcionalidad, validación, ProblemDetails y OpenAPI |
+| `CommunityHub.UI` | Razor Class Library: las páginas y componentes que usan la web y la app |
+| `CommunityHub.Web` | Blazor Web App (render mode Auto). Reenvía `/api/` a la API para el navegador |
+| `CommunityHub.Web.Client` | La parte que corre en el navegador con WebAssembly |
+| `CommunityHub.HybridApp` | App para Android y Windows con .NET MAUI Blazor Hybrid |
+| `CommunityHub.AppHost` | Aspire: arranca la API y la web con un solo comando, con panel de logs y trazas |
+| `CommunityHub.ServiceDefaults` | Health checks, OpenTelemetry, resiliencia y service discovery |
 
-Arranca en .NET 10 y en noviembre la migramos a .NET 11.
+Todo en .NET 10. En noviembre lo migramos a .NET 11.
 
 ## Estado
 
-🚧 **Semana 0.** Todavía no hay código: la solución empieza a mediados de octubre.
+🚧 **Semana 1.** La arquitectura está montada y funciona de punta a punta con el primer caso: los **retos**. La API los guarda en SQLite, la web los muestra (la app usa las mismas páginas) y cada capa tiene sus tests.
 
 | Semana | Qué se construye |
 |---|---|
-| 12 – 16 oct | Estructura de la solución y la librería de componentes compartida |
-| Octubre | Retos, envío de soluciones y validación |
+| 28 sep – 2 oct | Arquitectura de la solución y listado de retos ✅ |
+| Octubre | Detalle de retos, envío de soluciones y validación |
 | 2 – 6 nov | Login con Identity y passkeys |
 | 16 – 20 nov | Migración a .NET 11 |
 | 23 – 27 nov | Ranking en tiempo real con SignalR |
-| 7 – 11 dic | La app en el móvil con MAUI Blazor Hybrid |
-| 14 – 18 dic | Aspire |
+| 7 – 11 dic | La app en el móvil: APK instalable y lo nativo (cámara, notificaciones) |
 
 ## Cómo participar
 
 - **Entra al [grupo de Telegram](https://t.me/DotNetDesarrolladoresGrupo)** y cuéntanos qué le pondrías a la app. Las funcionalidades se votan ahí.
-- **En octubre hay Hacktoberfest:** voy a abrir issues con la etiqueta `good first issue` para que puedas hacer tu primer PR aquí. Los PRs van a [este repo](https://github.com/brianpl990227/CommunityHub); el de la organización es un fork.
+- **En octubre arranca Call Of Code:** voy a abrir issues con la etiqueta `good first issue` para que puedas hacer tu primer PR aquí. Los PRs van a [este repo](https://github.com/brianpl990227/CommunityHub); el de la organización es un fork.
 - **¿Ves algo raro en el código?** Abre un issue. Si te equivocas tú, no pasa nada; si me equivoco yo, mejor enterarme pronto 😅
 
 ## Para ejecutarlo
 
-Cuando haya código, solo vas a necesitar el [SDK de .NET 10](https://dotnet.microsoft.com/download):
+Solo necesitas el [SDK de .NET 10](https://dotnet.microsoft.com/download). **No hace falta Docker**: la base de datos es SQLite y se crea sola la primera vez. Es a propósito: mucha gente de la comunidad no puede usar Docker y la app tiene que arrancar en cualquier máquina.
 
 ```bash
 git clone https://github.com/brianpl990227/CommunityHub.git
 cd CommunityHub
-dotnet run --project src/CommunityHub.Web
+dotnet tool restore
 ```
 
-La base de datos es SQLite, así que no hace falta Docker. Es a propósito: mucha gente de la comunidad no puede usarlo, y la app tiene que arrancar en cualquier máquina.
+**Con Aspire (recomendado):** un solo comando arranca la API y la web, y te da un panel con los logs, las trazas y las métricas de todo.
+
+```bash
+dotnet run --project src/CommunityHub.AppHost
+```
+
+La primera vez, Aspire descarga su CLI (tarda un poco). Si falla por la conexión, instálala a mano desde [get.aspire.dev](https://get.aspire.dev) o con `dotnet dnx aspire.cli -- setup`.
+
+**Sin Aspire:** cada proyecto en su terminal.
+
+```bash
+dotnet run --project src/CommunityHub.Api    # http://localhost:5080
+dotnet run --project src/CommunityHub.Web    # http://localhost:5161
+```
+
+**Los tests:**
+
+```bash
+dotnet test CommunityHub.Web.slnf
+```
+
+**¿Solo vas a tocar la web o la API?** Abre `CommunityHub.Web.slnf` en vez de `CommunityHub.slnx`: es la misma solución sin la app MAUI ni el AppHost, así que no necesitas instalar nada más.
+
+**¿Quieres la app?** Instala la carga de MAUI (`dotnet workload install maui`, o desde el instalador de Visual Studio), abre `CommunityHub.slnx` y arranca `CommunityHub.HybridApp` en Windows o en el emulador de Android, con la API corriendo. iOS queda fuera porque hace falta un Mac.
+
+Así está organizada la solución:
+
+```
+Directory.Build.props             ajustes comunes (nullable, avisos = errores, analizadores)
+Directory.Packages.props          versiones de NuGet en un solo sitio
+global.json                       versión del SDK
+src/
+  CommunityHub.AppHost            Aspire
+  CommunityHub.ServiceDefaults    health checks, OpenTelemetry, resiliencia
+  CommunityHub.Domain             entidades y reglas
+  CommunityHub.Infrastructure     EF Core + SQLite
+  CommunityHub.Contracts          DTOs
+  CommunityHub.Api                Minimal APIs
+  CommunityHub.UI                 páginas y componentes compartidos
+  CommunityHub.Web                Blazor Web App
+  CommunityHub.Web.Client         la parte WebAssembly
+  CommunityHub.HybridApp          .NET MAUI Blazor Hybrid
+tests/
+  CommunityHub.Domain.Tests       reglas del dominio
+  CommunityHub.Api.Tests          integración con WebApplicationFactory y SQLite en memoria
+  CommunityHub.UI.Tests           componentes con bUnit
+```
 
 ## Licencia
 

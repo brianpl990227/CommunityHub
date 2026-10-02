@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web, API y tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore CommunityHub.Web.slnf
+      - run: dotnet build CommunityHub.Web.slnf --no-restore
+      - run: dotnet test CommunityHub.Web.slnf --no-build
+
+  maui:
+    name: App móvil (Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet workload install maui-android
+      - run: dotnet build src/CommunityHub.HybridApp/CommunityHub.HybridApp.csproj -f net10.0-android

@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CommunityHub.Api/CommunityHub.Api.csproj" />
+    <Project Path="src/CommunityHub.Infrastructure/CommunityHub.Infrastructure.csproj" />
+    <Project Path="src/CommunityHub.ServiceDefaults/CommunityHub.ServiceDefaults.csproj" />
+    <Project Path="src/CommunityHub.UI/CommunityHub.UI.csproj" />
+    <Project Path="src/CommunityHub.Web.Client/CommunityHub.Web.Client.csproj" />
+    <Project Path="src/CommunityHub.Web/CommunityHub.Web.csproj" />
+    <Project Path="src/CommunityHub.AppHost/CommunityHub.AppHost.csproj" />
+    <Project Path="src/CommunityHub.Contracts/CommunityHub.Contracts.csproj" />
+    <Project Path="src/CommunityHub.Domain/CommunityHub.Domain.csproj" />
+    <Project Path="src/CommunityHub.HybridApp/CommunityHub.HybridApp.csproj">
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CommunityHub.Api.Tests/CommunityHub.Api.Tests.csproj" />
+    <Project Path="tests/CommunityHub.Domain.Tests/CommunityHub.Domain.Tests.csproj" />
+    <Project Path="tests/CommunityHub.UI.Tests/CommunityHub.UI.Tests.csproj" />
+  </Folder>
+</Solution>

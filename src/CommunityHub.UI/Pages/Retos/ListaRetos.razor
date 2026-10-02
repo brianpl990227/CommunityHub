@@ -1,0 +1,39 @@
+@page "/retos"
+@inject IRetosClient RetosClient
+
+<PageTitle>Retos · CommunityHub</PageTitle>
+
+<h1>Retos</h1>
+
+@if (Retos is null)
+{
+    <p><em>Cargando retos…</em></p>
+}
+else if (Retos.Length == 0)
+{
+    <p>Todavía no hay retos. El primero sale el jueves en el grupo.</p>
+}
+else
+{
+    <ul class="retos">
+        @foreach (var reto in Retos)
+        {
+            <li class="reto">
+                <h2>@reto.Titulo</h2>
+                <p>@reto.Enunciado</p>
+                <span class="puntos">@reto.Puntos puntos</span>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    // Con prerendering, OnInitializedAsync se ejecuta dos veces. [PersistentState] guarda lo que
+    // se cargó en el servidor y evita volver a pedirlo al hacerse interactivo
+    // (https://learn.microsoft.com/aspnet/core/blazor/state-management/prerendered-state-persistence).
+    [PersistentState]
+    public RetoResponse[]? Retos { get; set; }
+
+    protected override async Task OnInitializedAsync() =>
+        Retos ??= await RetosClient.ObtenerTodosAsync();
+}
