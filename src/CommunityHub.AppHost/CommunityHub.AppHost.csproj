@@ -1,0 +1,15 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.5.4">
+
+  <ItemGroup>
+    <ProjectReference Include="..\CommunityHub.Api\CommunityHub.Api.csproj" />
+    <ProjectReference Include="..\CommunityHub.Web\CommunityHub.Web.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>d3eeff1d-1521-4e38-823f-65a78356b12b</UserSecretsId>
+  </PropertyGroup>
+
+</Project>

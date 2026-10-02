@@ -1,0 +1,18 @@
+@page "/"
+@using CommunityHub.UI.Services
+@inject IFormFactor FormFactor
+
+<PageTitle>CommunityHub</PageTitle>
+
+<h1>CommunityHub</h1>
+
+<p>La app de la comunidad DotNet Desarrolladores: retos de código cada semana y un ranking para ver quién va primero.</p>
+
+<p>Esta misma página se está ejecutando en <em>@factor</em> (<em>@platform</em>).</p>
+
+<p>Todavía estamos empezando. Sigue el proyecto en <a href="https://github.com/brianpl990227/CommunityHub">GitHub</a>.</p>
+
+@code {
+    private string factor => FormFactor.GetFormFactor();
+    private string platform => FormFactor.GetPlatform();
+}
