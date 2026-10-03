@@ -16,6 +16,16 @@ Retos de código cada semana y un ranking para ver quién va primero. Lo mismo q
 - Login
 - App móvil con la misma interfaz que la web (Android y Windows)
 
+## ¿Por qué el código está en español?
+
+Porque este proyecto es para aprender .NET en español. Las clases, los métodos, los tests y los comentarios están en español (`Reto`, `ObtenerTodosAsync`, `Crear_un_reto_valido_devuelve_201...`) para que nadie se pierda por el idioma mientras aprende.
+
+Lo que viene de .NET se queda como es: `DbContext`, `MapGroup`, `TypedResults`, `CancellationToken`…
+
+Eso sí, **en tus proyectos personales y en el trabajo, te recomiendo programar en inglés.** Es lo que vas a encontrar en casi cualquier equipo, en la documentación y en las librerías, y te abre la puerta a proyectos con gente de cualquier país.
+
+Si mandas un PR, sigue el estilo del proyecto: nombres en español.
+
 ## Arquitectura
 
 Sigue la regla de dependencias de [Clean Architecture](https://learn.microsoft.com/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures#clean-architecture): todo apunta hacia el dominio y el dominio no depende de nada. El dominio define las interfaces (`IRetoRepository`), la infraestructura las implementa con EF Core y la API solo habla con las interfaces. Alrededor: una librería de componentes que comparten la web y la app, y Aspire para arrancarlo todo junto.
