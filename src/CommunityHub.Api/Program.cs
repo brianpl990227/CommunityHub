@@ -1,7 +1,5 @@
 using CommunityHub.Api.Retos;
 using CommunityHub.Infrastructure;
-using CommunityHub.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +24,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
     // En desarrollo, la base de datos se crea y se rellena sola al arrancar.
-    await using var scope = app.Services.CreateAsyncScope();
-    await scope.ServiceProvider.GetRequiredService<CommunityHubDbContext>().Database.MigrateAsync();
+    await app.Services.MigrarBaseDeDatosAsync();
 }
 
 app.MapDefaultEndpoints();

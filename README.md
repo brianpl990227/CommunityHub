@@ -18,7 +18,7 @@ Retos de código cada semana y un ranking para ver quién va primero. Lo mismo q
 
 ## Arquitectura
 
-La idea es la de [eShop](https://github.com/dotnet/eShop), la app de referencia de Microsoft: un dominio sin dependencias, la infraestructura aparte, una API con Minimal APIs, una librería de componentes que comparten la web y la app, y Aspire para arrancarlo todo junto.
+Sigue la regla de dependencias de [Clean Architecture](https://learn.microsoft.com/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures#clean-architecture): todo apunta hacia el dominio y el dominio no depende de nada. El dominio define las interfaces (`IRetoRepository`), la infraestructura las implementa con EF Core y la API solo habla con las interfaces. Alrededor: una librería de componentes que comparten la web y la app, y Aspire para arrancarlo todo junto.
 
 ```mermaid
 flowchart LR
@@ -38,16 +38,17 @@ flowchart LR
     Web -- "HTTP (/api/ → API)" --> Api
     App -- HTTP --> Api
     Api --> Contracts
-    Api --> Infra
-    Infra --> Dominio
+    Api --> Dominio
+    Infra -- "implementa IRetoRepository" --> Dominio
+    Api -. "solo para registrar servicios" .-> Infra
 ```
 
 | Proyecto | Qué hace |
 |---|---|
-| `CommunityHub.Domain` | Entidades y reglas del negocio (`Reto`). No depende de nada: ni de EF ni de ASP.NET |
-| `CommunityHub.Infrastructure` | EF Core + SQLite: `DbContext`, configuraciones, migraciones y datos de ejemplo |
+| `CommunityHub.Domain` | Entidades, reglas del negocio (`Reto`) y las interfaces que implementa la infraestructura (`IRetoRepository`). No depende de nada: ni de EF ni de ASP.NET |
+| `CommunityHub.Infrastructure` | EF Core + SQLite: `DbContext`, configuraciones, migraciones, repositorios y datos de ejemplo |
 | `CommunityHub.Contracts` | Los DTOs que comparten la API, la web y la app |
-| `CommunityHub.Api` | Minimal APIs agrupadas por funcionalidad, validación, ProblemDetails y OpenAPI |
+| `CommunityHub.Api` | Minimal APIs agrupadas por funcionalidad, validación, ProblemDetails y OpenAPI. Los endpoints solo conocen las interfaces del dominio; la infraestructura se registra en `Program.cs` |
 | `CommunityHub.UI` | Razor Class Library: las páginas y componentes que usan la web y la app |
 | `CommunityHub.Web` | Blazor Web App (render mode Auto). Reenvía `/api/` a la API para el navegador |
 | `CommunityHub.Web.Client` | La parte que corre en el navegador con WebAssembly |
@@ -120,7 +121,7 @@ global.json                       versión del SDK
 src/
   CommunityHub.AppHost            Aspire
   CommunityHub.ServiceDefaults    health checks, OpenTelemetry, resiliencia
-  CommunityHub.Domain             entidades y reglas
+  CommunityHub.Domain             entidades, reglas e interfaces
   CommunityHub.Infrastructure     EF Core + SQLite
   CommunityHub.Contracts          DTOs
   CommunityHub.Api                Minimal APIs
@@ -129,7 +130,7 @@ src/
   CommunityHub.Web.Client         la parte WebAssembly
   CommunityHub.HybridApp          .NET MAUI Blazor Hybrid
 tests/
-  CommunityHub.Domain.Tests       reglas del dominio
+  CommunityHub.Domain.Tests       reglas del dominio y de arquitectura
   CommunityHub.Api.Tests          integración con WebApplicationFactory y SQLite en memoria
   CommunityHub.UI.Tests           componentes con bUnit
 ```

@@ -1,5 +1,6 @@
 using CommunityHub.Domain.Retos;
 using CommunityHub.Infrastructure.Persistence;
+using CommunityHub.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,7 +33,18 @@ public static class DependencyInjection
                 }
             }));
 
+        services.AddScoped<IRetoRepository, RetoRepository>();
+
         return services;
+    }
+
+    /// <summary>
+    /// Crea la base de datos (o aplica las migraciones que falten). Así la API no necesita saber nada de EF Core.
+    /// </summary>
+    public static async Task MigrarBaseDeDatosAsync(this IServiceProvider services)
+    {
+        await using var scope = services.CreateAsyncScope();
+        await scope.ServiceProvider.GetRequiredService<CommunityHubDbContext>().Database.MigrateAsync();
     }
 
     private static Reto[] RetosDeEjemplo() =>

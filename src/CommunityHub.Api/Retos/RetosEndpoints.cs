@@ -1,8 +1,6 @@
 using CommunityHub.Contracts.Retos;
 using CommunityHub.Domain.Retos;
-using CommunityHub.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace CommunityHub.Api.Retos;
 
@@ -20,21 +18,17 @@ public static class RetosEndpoints
     }
 
     private static async Task<Ok<RetoResponse[]>> ObtenerTodos(
-        CommunityHubDbContext db, CancellationToken cancellationToken)
+        IRetoRepository repositorio, CancellationToken cancellationToken)
     {
-        var retos = await db.Retos
-            .AsNoTracking()
-            .OrderByDescending(r => r.PublicadoEl)
-            .Select(r => new RetoResponse(r.Id, r.Titulo, r.Enunciado, r.Puntos, r.PublicadoEl))
-            .ToArrayAsync(cancellationToken);
+        var retos = await repositorio.ObtenerTodosAsync(cancellationToken);
 
-        return TypedResults.Ok(retos);
+        return TypedResults.Ok(retos.Select(r => r.ToResponse()).ToArray());
     }
 
     private static async Task<Results<Ok<RetoResponse>, NotFound>> ObtenerPorId(
-        int id, CommunityHubDbContext db, CancellationToken cancellationToken)
+        int id, IRetoRepository repositorio, CancellationToken cancellationToken)
     {
-        var reto = await db.Retos.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+        var reto = await repositorio.ObtenerPorIdAsync(id, cancellationToken);
 
         return reto is null
             ? TypedResults.NotFound()
@@ -42,12 +36,11 @@ public static class RetosEndpoints
     }
 
     private static async Task<CreatedAtRoute<RetoResponse>> Crear(
-        CrearRetoRequest request, CommunityHubDbContext db, TimeProvider time, CancellationToken cancellationToken)
+        CrearRetoRequest request, IRetoRepository repositorio, TimeProvider time, CancellationToken cancellationToken)
     {
         var reto = Reto.Crear(request.Titulo, request.Enunciado, request.Puntos, time.GetUtcNow());
 
-        db.Retos.Add(reto);
-        await db.SaveChangesAsync(cancellationToken);
+        await repositorio.AgregarAsync(reto, cancellationToken);
 
         return TypedResults.CreatedAtRoute(reto.ToResponse(), nameof(ObtenerPorId), new { id = reto.Id });
     }
