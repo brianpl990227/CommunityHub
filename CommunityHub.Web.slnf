@@ -3,6 +3,7 @@
     "path": "CommunityHub.slnx",
     "projects": [
       "src/CommunityHub.Api/CommunityHub.Api.csproj",
+      "src/CommunityHub.Application/CommunityHub.Application.csproj",
       "src/CommunityHub.Infrastructure/CommunityHub.Infrastructure.csproj",
       "src/CommunityHub.ServiceDefaults/CommunityHub.ServiceDefaults.csproj",
       "src/CommunityHub.UI/CommunityHub.UI.csproj",
@@ -11,6 +12,7 @@
       "src/CommunityHub.Contracts/CommunityHub.Contracts.csproj",
       "src/CommunityHub.Domain/CommunityHub.Domain.csproj",
       "tests/CommunityHub.Api.Tests/CommunityHub.Api.Tests.csproj",
+      "tests/CommunityHub.Application.Tests/CommunityHub.Application.Tests.csproj",
       "tests/CommunityHub.Domain.Tests/CommunityHub.Domain.Tests.csproj",
       "tests/CommunityHub.UI.Tests/CommunityHub.UI.Tests.csproj"
     ]

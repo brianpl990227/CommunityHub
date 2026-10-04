@@ -28,7 +28,7 @@ Si mandas un PR, sigue el estilo del proyecto: nombres en español.
 
 ## Arquitectura
 
-Sigue la regla de dependencias de [Clean Architecture](https://learn.microsoft.com/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures#clean-architecture): todo apunta hacia el dominio y el dominio no depende de nada. El dominio define las interfaces (`IRetoRepository`), la infraestructura las implementa con EF Core y la API solo habla con las interfaces. Alrededor: una librería de componentes que comparten la web y la app, y Aspire para arrancarlo todo junto.
+Sigue la regla de dependencias de [Clean Architecture](https://learn.microsoft.com/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures#clean-architecture): todo apunta hacia el dominio y el dominio no depende de nada. El dominio guarda las reglas y define las interfaces (`IRetoRepository`), la infraestructura las implementa con EF Core, la capa de aplicación tiene los casos de uso y la API solo traduce HTTP: recibe la petición, llama al caso de uso y devuelve la respuesta. Alrededor: una librería de componentes que comparten la web y la app, y Aspire para arrancarlo todo junto.
 
 ```mermaid
 flowchart LR
@@ -38,6 +38,7 @@ flowchart LR
     end
     UI["UI<br/>páginas y componentes compartidos"]
     Api["Api<br/>Minimal APIs"]
+    App2["Application<br/>casos de uso"]
     Infra["Infrastructure<br/>EF Core + SQLite"]
     Dominio["Domain<br/>entidades y reglas"]
     Contracts["Contracts<br/>DTOs"]
@@ -48,7 +49,9 @@ flowchart LR
     Web -- "HTTP (/api/ → API)" --> Api
     App -- HTTP --> Api
     Api --> Contracts
-    Api --> Dominio
+    Api --> App2
+    App2 --> Dominio
+    App2 --> Contracts
     Infra -- "implementa IRetoRepository" --> Dominio
     Api -. "solo para registrar servicios" .-> Infra
 ```
@@ -56,15 +59,24 @@ flowchart LR
 | Proyecto | Qué hace |
 |---|---|
 | `CommunityHub.Domain` | Entidades, reglas del negocio (`Reto`) y las interfaces que implementa la infraestructura (`IRetoRepository`). No depende de nada: ni de EF ni de ASP.NET |
+| `CommunityHub.Application` | Los casos de uso (`CrearReto`, `ObtenerRetos`…). Coordinan el dominio y los repositorios, pero no tienen reglas del negocio: esas están en las entidades |
 | `CommunityHub.Infrastructure` | EF Core + SQLite: `DbContext`, configuraciones, migraciones, repositorios y datos de ejemplo |
 | `CommunityHub.Contracts` | Los DTOs que comparten la API, la web y la app |
-| `CommunityHub.Api` | Minimal APIs agrupadas por funcionalidad, validación, ProblemDetails y OpenAPI. Los endpoints solo conocen las interfaces del dominio; la infraestructura se registra en `Program.cs` |
+| `CommunityHub.Api` | Minimal APIs agrupadas por funcionalidad, validación, ProblemDetails y OpenAPI. Los endpoints solo llaman a los casos de uso; la infraestructura se registra en `Program.cs` |
 | `CommunityHub.UI` | Razor Class Library: las páginas y componentes que usan la web y la app |
 | `CommunityHub.Web` | Blazor Web App (render mode Auto). Reenvía `/api/` a la API para el navegador |
 | `CommunityHub.Web.Client` | La parte que corre en el navegador con WebAssembly |
 | `CommunityHub.HybridApp` | App para Android y Windows con .NET MAUI Blazor Hybrid |
 | `CommunityHub.AppHost` | Aspire: arranca la API y la web con un solo comando, con panel de logs y trazas |
 | `CommunityHub.ServiceDefaults` | Health checks, OpenTelemetry, resiliencia y service discovery |
+
+**¿Dónde va cada cosa?** Si vas a añadir una funcionalidad:
+
+- Una regla del negocio («un reto tiene entre 1 y 100 puntos») va en la entidad, en `Domain`.
+- Lo que hay que hacer paso a paso («comprobar que el reto existe, guardar la solución y sumar los puntos») va en un caso de uso de `Application`.
+- El endpoint solo recibe la petición, llama al caso de uso y elige la respuesta HTTP. Si te ves escribiendo un `if` del negocio en un endpoint, va en otro sitio.
+
+Los tests de arquitectura lo comprueban: la API no puede usar ni EF Core ni el dominio.
 
 Todo en .NET 10. En noviembre lo migramos a .NET 11.
 
@@ -132,6 +144,7 @@ src/
   CommunityHub.AppHost            Aspire
   CommunityHub.ServiceDefaults    health checks, OpenTelemetry, resiliencia
   CommunityHub.Domain             entidades, reglas e interfaces
+  CommunityHub.Application        casos de uso
   CommunityHub.Infrastructure     EF Core + SQLite
   CommunityHub.Contracts          DTOs
   CommunityHub.Api                Minimal APIs
@@ -141,6 +154,7 @@ src/
   CommunityHub.HybridApp          .NET MAUI Blazor Hybrid
 tests/
   CommunityHub.Domain.Tests       reglas del dominio y de arquitectura
+  CommunityHub.Application.Tests  casos de uso con un repositorio en memoria
   CommunityHub.Api.Tests          integración con WebApplicationFactory y SQLite en memoria
   CommunityHub.UI.Tests           componentes con bUnit
 ```
