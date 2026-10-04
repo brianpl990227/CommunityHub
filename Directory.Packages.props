@@ -18,6 +18,11 @@
     <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
+  <!-- Extensiones de .NET -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+
   <!-- EF Core -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
@@ -39,6 +44,7 @@
   <!-- Tests -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.8.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="bunit" Version="2.11.3" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />

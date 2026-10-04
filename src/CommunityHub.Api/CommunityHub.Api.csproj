@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\CommunityHub.Domain\CommunityHub.Domain.csproj" />
+    <ProjectReference Include="..\CommunityHub.Application\CommunityHub.Application.csproj" />
     <!-- Solo para registrar los servicios en Program.cs (composition root) -->
     <ProjectReference Include="..\CommunityHub.Infrastructure\CommunityHub.Infrastructure.csproj" />
     <ProjectReference Include="..\CommunityHub.Contracts\CommunityHub.Contracts.csproj" />

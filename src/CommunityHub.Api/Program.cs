@@ -1,10 +1,12 @@
 using CommunityHub.Api.Retos;
+using CommunityHub.Application;
 using CommunityHub.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("communityhub")
     ?? throw new InvalidOperationException("Falta la cadena de conexión 'communityhub'."));

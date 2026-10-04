@@ -1,9 +1,10 @@
+using CommunityHub.Application.Retos;
 using CommunityHub.Contracts.Retos;
-using CommunityHub.Domain.Retos;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CommunityHub.Api.Retos;
 
+// Los endpoints solo traducen HTTP: reciben la petición, llaman al caso de uso y eligen la respuesta.
 public static class RetosEndpoints
 {
     public static IEndpointRouteBuilder MapRetosEndpoints(this IEndpointRouteBuilder app)
@@ -18,33 +19,24 @@ public static class RetosEndpoints
     }
 
     private static async Task<Ok<RetoResponse[]>> ObtenerTodos(
-        IRetoRepository repositorio, CancellationToken cancellationToken)
-    {
-        var retos = await repositorio.ObtenerTodosAsync(cancellationToken);
-
-        return TypedResults.Ok(retos.Select(r => r.ToResponse()).ToArray());
-    }
+        ObtenerRetos obtenerRetos, CancellationToken cancellationToken) =>
+        TypedResults.Ok(await obtenerRetos.EjecutarAsync(cancellationToken));
 
     private static async Task<Results<Ok<RetoResponse>, NotFound>> ObtenerPorId(
-        int id, IRetoRepository repositorio, CancellationToken cancellationToken)
+        int id, ObtenerReto obtenerReto, CancellationToken cancellationToken)
     {
-        var reto = await repositorio.ObtenerPorIdAsync(id, cancellationToken);
+        var reto = await obtenerReto.EjecutarAsync(id, cancellationToken);
 
         return reto is null
             ? TypedResults.NotFound()
-            : TypedResults.Ok(reto.ToResponse());
+            : TypedResults.Ok(reto);
     }
 
     private static async Task<CreatedAtRoute<RetoResponse>> Crear(
-        CrearRetoRequest request, IRetoRepository repositorio, TimeProvider time, CancellationToken cancellationToken)
+        CrearRetoRequest request, CrearReto crearReto, CancellationToken cancellationToken)
     {
-        var reto = Reto.Crear(request.Titulo, request.Enunciado, request.Puntos, time.GetUtcNow());
+        var reto = await crearReto.EjecutarAsync(request, cancellationToken);
 
-        await repositorio.AgregarAsync(reto, cancellationToken);
-
-        return TypedResults.CreatedAtRoute(reto.ToResponse(), nameof(ObtenerPorId), new { id = reto.Id });
+        return TypedResults.CreatedAtRoute(reto, nameof(ObtenerPorId), new { id = reto.Id });
     }
-
-    private static RetoResponse ToResponse(this Reto reto) =>
-        new(reto.Id, reto.Titulo, reto.Enunciado, reto.Puntos, reto.PublicadoEl);
 }
