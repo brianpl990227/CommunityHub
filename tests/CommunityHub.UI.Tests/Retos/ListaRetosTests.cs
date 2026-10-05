@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bunit;
 using CommunityHub.Contracts.Retos;
 using CommunityHub.UI.Pages.Retos;
@@ -30,6 +31,27 @@ public class ListaRetosTests : BunitContext
 
         cut.WaitForAssertion(() => Assert.Contains("Todavía no hay retos", cut.Markup));
     }
+    
+    [Theory]
+    [InlineData("es-ES")]
+    [InlineData("en-US")]
+    public void Muestra_fecha_dependiendo_cultura(string culture)
+    {
+        // Arrange
+        var cultureInfo = new CultureInfo(culture);
+        CultureInfo.CurrentCulture = cultureInfo;
+        
+        var date = new DateTime(2026, 10, 5, 14, 30, 0);
+        
+        Services.AddSingleton<IRetosClient>(
+            new RetosClientFalso(new RetoResponse(1, "FizzBuzz", "Del 1 al 100.", 10, date)));
+        
+        var cut = Render<ListaRetos>();
+        var formatedDateCulture = date.ToString("G", cultureInfo);
+        
+        Assert.Equal(formatedDateCulture, cut.Find(".fecha").TextContent);
+    }
+
 
     private sealed class RetosClientFalso(params RetoResponse[] retos) : IRetosClient
     {

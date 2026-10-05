@@ -21,3 +21,9 @@
     font-weight: 600;
     color: #2C8A57;
 }
+
+.fecha {
+    display: flex;
+    justify-content: flex-end;
+    color: #6c757d;
+}
