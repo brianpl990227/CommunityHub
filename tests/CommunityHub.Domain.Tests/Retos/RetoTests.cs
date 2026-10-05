@@ -33,4 +33,10 @@ public class RetoTests
     [InlineData(101)]
     public void Crear_con_puntos_fuera_de_rango_lanza_excepcion(int puntos) =>
         Assert.Throws<ArgumentOutOfRangeException>(() => Reto.Crear("FizzBuzz", "Enunciado", puntos, Ahora));
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Crear_sin_enunciado_lanza_excepcion(string enunciado) =>
+        Assert.Throws<ArgumentException>(() => Reto.Crear("Titulo", enunciado, 10, Ahora));
 }
