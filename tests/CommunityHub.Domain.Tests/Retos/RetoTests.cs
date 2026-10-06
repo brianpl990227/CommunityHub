@@ -22,7 +22,13 @@ public class RetoTests
     [InlineData("   ")]
     public void Crear_sin_titulo_lanza_excepcion(string titulo) =>
         Assert.Throws<ArgumentException>(() => Reto.Crear(titulo, "Enunciado", 10, Ahora));
-
+    
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Crear_sin_enunciado_lanza_excepcion(string enunciado) =>
+        Assert.Throws<ArgumentException>(() => Reto.Crear("Titulo", enunciado, 10, Ahora));
+    
     [Fact]
     public void Crear_con_titulo_demasiado_largo_lanza_excepcion() =>
         Assert.Throws<ArgumentOutOfRangeException>(() =>
