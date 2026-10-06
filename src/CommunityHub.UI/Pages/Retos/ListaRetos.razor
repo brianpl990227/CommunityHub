@@ -1,4 +1,5 @@
 @page "/retos"
+@using System.Globalization
 @inject IRetosClient RetosClient
 
 <PageTitle>Retos · CommunityHub</PageTitle>
@@ -22,6 +23,7 @@ else
                 <h2>@reto.Titulo</h2>
                 <p>@reto.Enunciado</p>
                 <span class="puntos">@reto.Puntos puntos</span>
+                <span class="fecha">@reto.PublicadoEl.ToString("G", CultureInfo.CurrentCulture)</span>
             </li>
         }
     </ul>
