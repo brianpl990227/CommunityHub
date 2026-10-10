@@ -5,6 +5,9 @@ namespace CommunityHub.Application.Retos;
 
 internal static class RetoMapping
 {
-    public static RetoResponse ToResponse(this Reto reto) =>
-        new(reto.Id, reto.Titulo, reto.Enunciado, reto.Puntos, reto.PublicadoEl);
+    extension(Reto reto)
+    {
+        public RetoResponse ToResponse() =>
+            new(reto.Id, reto.Titulo, reto.Enunciado, reto.Puntos, reto.PublicadoEl);
+    }
 }
